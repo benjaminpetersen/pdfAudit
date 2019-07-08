@@ -1,0 +1,79 @@
+<div class="headerBar">
+  <h1 class="title">PDF audit tool</h1>
+  <span class="zoom">
+    <span class="zoomIn child fas fa-search-plus" (click)="zoomIn()"></span>
+    <span class="zoomOut child fas fa-search-minus"(click)="zoomOut()"></span>
+  </span>
+  <span class="floatChildrenRight">
+    <span class="save child fas fa-save"></span>
+    <label for="fileInput" class="fileInput child fas fa-plus"></label><input id="fileInput" type="file" (change)="loadNewPDF($event)">
+    <span class="share child fas fa-share-alt"></span>
+    <a href="" class="signout child rightSide fas fa-sign-out-alt"></a>
+  </span>
+</div>
+<div class="headerBarSpacer"></div>
+<div class="sidebarRight" id="sidebarRight">
+  <h2 class="title">Navigation</h2>
+  <ul>
+    <li *ngIf="linearHighlights.length === 0">No highlighted sections to show</li>
+    <li *ngFor="let highlight of linearHighlights" (onmouseover)="console.log('yeppersa')">
+      <form #form="ngForm" #highlightForm (keydown.enter)="onSubmit(highlight, form)">
+        <div class="positionAbsolute">
+          <button class="scrollTo fas fa-eye" (click)="scrollTo(highlight)"></button>
+          <button class="delete fas fa-trash-alt" (click)="delete(highlight)"></button>
+        </div>
+        <div class="highlight" [class.bold]="highlight.expanded">
+          <span class="fas" [class.fa-chevron-down]="!highlight.expanded" [class.fa-chevron-up]="highlight.expanded" (click)="expandField(highlight, form)"></span>
+          <span *ngIf="!highlight.formMode">
+            {{highlight.field}}
+          </span>
+          <input *ngIf="highlight.formMode" type="text" [(ngModel)]="highlight.field" name="field" autofocus>
+        </div>
+        <div *ngIf="highlight.expanded">
+          <hr>
+          <button class="edit" (click)="edit(highlight, form)">Edit</button>
+          <div class="paddingLeft">
+            <p><b>Value</b>: 
+              <span *ngIf="!highlight.formMode">{{highlight.value}}</span>
+              <input *ngIf="highlight.formMode" type="text" [(ngModel)]="highlight.value" name="value">
+            </p>
+            <p><b>passed: </b>
+              <span *ngIf="!highlight.formMode">{{highlight.passed}}</span>
+              <select *ngIf="highlight.formMode" name="passed" [(ngModel)]="highlight.passed">
+                <option value="true">yes</option>
+                <option value="false">no</option>
+              </select>
+            </p>
+            <p><b>Message</b>: 
+              <span *ngIf="!highlight.formMode">
+                {{highlight.comments}}
+              </span>
+              <input *ngIf="highlight.formMode" type="text" [(ngModel)]="highlight.comments" name="comments">
+            </p>
+            <p>
+              <b>Author</b>: {{highlight.author}}
+            </p>
+            <p><b>Page</b>: {{highlight.page}}</p>
+            <button *ngIf="highlight.formMode" (click)="onSubmit(highlight, form)">Submit</button>
+          </div>
+        </div> 
+      </form>
+    </li>
+  </ul>
+</div>
+<div class="background">
+  <!-- just a hack to allow a radial gradient to appear fixed -->
+</div>
+<div class="sidebarLeft" id="sidebarLeft">
+  <div class="fas fa-folder"></div>
+  <div class="fas fa-history"></div>
+  <div class="fas fa-star"></div>
+  <div class="fas fa-bookmark"></div>
+  <div class="fas fa-plus"></div>
+  <div class="fas fa-save"></div>
+</div>
+<div class="pdf">
+  <div class="navHighlights">
+  </div>
+  <app-pdf-page *ngFor="let page of pages; let i = index" [pageNum] = "i" [zoom] = "zoom" (addHighlight)="updateHighlights($event)">{{i}}</app-pdf-page>
+</div>

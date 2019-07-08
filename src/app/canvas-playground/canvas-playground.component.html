@@ -1,0 +1,10 @@
+<p>mine is better</p>
+
+<canvas #canvas id="pdf" (mousedown)="getCursorPositionDown(canvas, $event)" (mouseup)="getCursorPositionUp(canvas, $event)" (mousemove)="onMove(canvas, $event)"></canvas>
+<p>xMouseDown: {{xMouseDown}}</p>
+<p>yMouseDown: {{yMouseDown}}</p>
+<p>xMouseUp: {{xMouseUp}}</p>
+<p>yMouseUp: {{yMouseUp}}</p>
+<p>xCurrent: {{xCurrent}}</p>
+<p>yCurrent: {{yCurrent}}</p>
+<!-- <p>clarifyEvent: {{ clarifyEvent | json }}</p> -->
