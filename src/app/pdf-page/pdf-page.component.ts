@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, AfterViewInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnChanges, Input, AfterViewInit, Output, EventEmitter } from '@angular/core';
 import { LoadPdfService } from '../load-pdf.service';
 import { NgForm } from '@angular/forms';
 import { environment } from '../../environments/environment';
@@ -10,7 +10,7 @@ import { UserHighlightsInterface, CanvasLocationInterface } from '../../public/i
   templateUrl: './pdf-page.component.html',
   styleUrls: ['./pdf-page.component.css']
 })
-export class PdfPageComponent implements OnInit, AfterViewInit {
+export class PdfPageComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() pageNum: number;
   private _zoom: number = 1;
   @Input() 
@@ -23,7 +23,8 @@ export class PdfPageComponent implements OnInit, AfterViewInit {
       }
     }
     get zoom(){ return this._zoom};
-  @Output() addHighlight = new EventEmitter<number>();
+  @Input() redraw: boolean;
+  @Output() addHighlight = new EventEmitter<UserHighlightsInterface>();
 
   canvasLocation: CanvasLocationInterface = { //just initialized to supress a stupid error
     left: 0,
@@ -38,9 +39,10 @@ export class PdfPageComponent implements OnInit, AfterViewInit {
 
   mousedown: boolean;
   dragged: boolean = false;
-  allHighlights: any[];
+  allHighlights: UserHighlightsInterface[];
   prevHighlights: UserHighlightsInterface[];
   tempRect: number[];
+  viewInit: boolean = false;
 
   canvas: any;
   highlightCanvas: any;
@@ -52,6 +54,7 @@ export class PdfPageComponent implements OnInit, AfterViewInit {
     this.allHighlights = pdfOverlayService.getUserHighlights(this.pageNum);
     // console.log(this.prevHighlights);//for some reason this the whole array and not the specfic potion i asked for. 
   }
+
   
   ngOnInit() {
     this.pageNum++;//just because the input is index, so plus one to get page number.//
@@ -65,6 +68,7 @@ export class PdfPageComponent implements OnInit, AfterViewInit {
       });
     })
   }
+
   
   ngAfterViewInit() {
     this.canvas = document.getElementById('pdfCanvas' + this.pageNum);
@@ -74,6 +78,17 @@ export class PdfPageComponent implements OnInit, AfterViewInit {
       this.renderPage();
       this.resetCanvas(); //wat not werkin
     })
+    this.viewInit = true;
+  }
+  
+  ngOnChanges(change){
+    if(this.viewInit){
+      this.resetCanvas();
+    }
+  }
+
+  redrawMe(){
+    this.redraw = !this.redraw;
   }
 
   renderPage = () => { //how to run on zoom change. . . jeez. resource intensive but wat evs. change in future. 
@@ -97,12 +112,15 @@ export class PdfPageComponent implements OnInit, AfterViewInit {
     this.yDown = event.clientY - this.canvasLocation.top;
   }
 
-  getCursorPositionUp(canvas, event, highlightFormElement){
+  getCursorPositionUp(canvas, event){
     this.mousedown = false;
 
     this.xUp = event.clientX - this.canvasLocation.left;
     this.yUp = event.clientY - this.canvasLocation.top;
-    this.initializeHighlight();
+    if(this.dragged === true){//don't make a highlight on a click
+      this.initializeHighlight();
+    }
+    this.dragged = false;
   }
 
   onMove(canvas, event){
@@ -131,27 +149,30 @@ export class PdfPageComponent implements OnInit, AfterViewInit {
   resetCanvas(){
     this.prevHighlights = this.pdfOverlayService.getUserHighlights(this.pageNum); // I can't seem to get this fn to work without this line. this.prevHighlights should be a reference to a service's array, but it isn't...
     const ctx = this.highlightCanvas.getContext('2d');
-    ctx.globalAlpha = 0.3; //todo fixaroo
-    ctx.clearRect(0, 0, this.highlightCanvas.width, this.highlightCanvas.height);
-    //have a rectangle array with sub arrays. then iterate over and pass in the array each time. spread in ctx.rect(...rectaARasy)
+    ctx.globalAlpha = 0.3; //transparency of rectangles
+    ctx.clearRect(0, 0, this.highlightCanvas.width, this.highlightCanvas.height); //clear
     //alternatively i'd really like to have another canvas for temporary rectangles
-    let iterations = this.prevHighlights ? this.prevHighlights.length : 0;
+    let iterations = this.prevHighlights ? this.prevHighlights.length : 0;//safe traversal is a better solution
     for(let i=0; i<iterations; i++){
       this.drawRect(ctx, this.prevHighlights[i].coordinates);
     };
   }
 
   initializeHighlight(){
-    //add validation
+    //todo add validation
     let newHighlight: UserHighlightsInterface = {
       coordinates: this.tempRect,//how to avoid passing this as a reference or whatever
       author: environment.author,
+      field: '',
+      value: '',
+      passed: false,
+      comments: '',
       page: this.pageNum,
       expanded: true,
       formMode: true,
       count: 0
     }
-    this.pdfOverlayService.setUserHighlights(newHighlight);
-    this.addHighlight.emit(this.pageNum);
+    this.pdfOverlayService.setUserHighlights(newHighlight); //this service could return a pointer to the highlight and i could pass that along. 
+    this.addHighlight.emit(newHighlight);
   }
 }

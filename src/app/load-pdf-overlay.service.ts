@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { UserHighlightsInterface } from '../public/interfaces';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -10,10 +11,27 @@ export class LoadPdfOverlayService {
   private _count: number = 3;
   private _linearArray: UserHighlightsInterface[] = [];
 
-  constructor() {
+  constructor(private afStore: AngularFirestore) {
     this.linearizeUserHighlights();
   }
 
+  initHighlights(userFileData){
+    // let key = userFileData.name;
+    // let toSave = {key: [[]]};
+    // this.afStore.collection('highlights').doc(userFileData.highlights).set({key: [[]]});
+  }
+  //i'll just load userHighlights on new docs. need to get this from userService to get teh reference.
+  //save changes on additions and removal. 
+  loadPdfOverlays(userFileData){
+    let path = userFileData.highlights
+    //need to run the async then set _highlights and linearize?
+    this.afStore.collection('highlights').doc(path).get().subscribe((highlights)=>{
+      this._userHighlights = highlights.data() as UserHighlightsInterface[][];//shouldn't need to repass return... maybe that's a closure or some bs
+      this.linearizeUserHighlights();
+    })
+  }
+
+  //need to update these... ugh. just resave i think
   setUserHighlights(h: UserHighlightsInterface){//change this to update... the code will find location and add/replace sort by y val, and somehow use count...
     //todo: test if linearArray is just an array of pointers to _userhighlight objs -> change the _userHighlights object, and check if it also changes in linear array without re-linearizing. it should 
     // h.count = ++this._count; 
@@ -35,6 +53,7 @@ export class LoadPdfOverlayService {
         }
         else {
           //check if it's new, then add to that position, or update that position, and leave the for loop
+          //how to figure out which on is new?
           if(arrayPoint[i].count === h.count){
             arrayPoint.splice(i, 1, h);
           }
@@ -49,9 +68,21 @@ export class LoadPdfOverlayService {
       this._userHighlights[h.page - 1] = [h]
     };
     this.linearizeUserHighlights();
+    return h;
+  }
+
+  deleteUserHighlight(h: UserHighlightsInterface){
+    //find and remove
+    let arrayPoint = this._userHighlights[h.page - 1];
+    arrayPoint.forEach((highlight, index)=>{
+      if(highlight.count === h.count){
+        arrayPoint.splice(index, 1);
+      }
+    });
+    this.linearizeUserHighlights();
   }
   
-  linearizeUserHighlights(){
+  linearizeUserHighlights(){//need to call this on every change :( 
     //todo -> maybe take a bit less processor by finding new part and adding it normally.. should only be one at atime. 
     this._linearArray = [];
     for(let i=0; i<this._userHighlights.length; i++){
@@ -69,14 +100,4 @@ export class LoadPdfOverlayService {
     return this._linearArray;
   }
 
-  deleteUserHighlight(h: UserHighlightsInterface){
-    //find and remove
-    let arrayPoint = this._userHighlights[h.page - 1];
-    arrayPoint.forEach((highlight, index)=>{
-      if(highlight.count === h.count){
-        arrayPoint.splice(index, 1);
-      }
-    });
-    this.linearizeUserHighlights();
-  }
 }

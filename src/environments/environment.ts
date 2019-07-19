@@ -4,7 +4,16 @@
 
 export const environment = {
   production: false,
-  author: "bpetersen123@hotmail.com"
+  author: "bpetersen123@hotmail.com",
+  firebase: {
+    apiKey: "AIzaSyAj5rz07LzHIt-YS-HfnFg36dATG5Nr3aE",
+    authDomain: "tsestting.firebaseapp.com",
+    databaseURL: "https://tsestting.firebaseio.com",
+    projectId: "tsestting",
+    storageBucket: "tsestting.appspot.com",
+    messagingSenderId: "102625481882",
+    appId: "1:102625481882:web:4ab603c601f538cd"
+  }
 };
 
 /*

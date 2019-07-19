@@ -1,0 +1,24 @@
+.tesseesting {
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    background-color: rgb(255, 187, 0);
+    border: 5px solid rgb(184, 135, 0);
+    border-radius: 5px;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 3px;
+}
+
+.fa-exclamation-triangle {
+    color: yellow;
+}
+
+form {
+    background-color: rgb(255, 187, 0);
+    border: 5px solid rgb(184, 135, 0);
+    position: absolute;
+    width: 50%;
+    left: 100px;
+    /* erm a gerd. already breaking down. fuck it. just bodge it togheterh */
+}

@@ -1,4 +1,4 @@
 <div class="canvasContainer" id="canvasContainer{{pageNum}}">
   <canvas class="pdfCanvas" id="pdfCanvas{{pageNum}}"></canvas>
-  <canvas class="highlightCanvas" id="highlightCanvas{{pageNum}}" #canvas (mousedown)="getCursorPositionDown(canvas, $event);" (mouseup)="getCursorPositionUp(canvas, $event, highlightForm, form);" (mousemove)="onMove(canvas, $event);"></canvas>
+  <canvas class="highlightCanvas" id="highlightCanvas{{pageNum}}" #canvas (mousedown)="getCursorPositionDown(canvas, $event);" (mouseup)="getCursorPositionUp(canvas, $event);" (mousemove)="onMove(canvas, $event);"></canvas>
 </div>

@@ -1,0 +1,24 @@
+<span class="tesseesting" (click)="toggleExpand()">
+  <span class="fas fa-exclamation-triangle"></span>
+  Sign in to save changes
+  <span class="fas fa-exclamation-triangle"></span>
+  <form class="login" [style.display]="expanded ? 'block' : 'none'" #form="ngForm" (click)="stopPropagation($event)">
+    <!-- eventually i'll use the open source one -->
+    <h3>Login</h3>
+    <label for="email">Enter your email</label>
+    <input ngModel type="text" name="email">
+    <label for="password">Enter your password</label>
+    <input ngModel type="password" name="password">
+    <button (click)="submitLogin(form)">Login</button>
+    <h3>Register</h3>
+    <label for="emailRegister">Enter your email</label>
+    <input ngModel type="text" name="emailRegister">
+    <label for="emailConfirmRegister">Confirm your email</label>
+    <input ngModel type="text" name="emailConfirmRegister">
+    <label for="passwordRegister">Enter your password</label>
+    <input ngModel type="password" name="passwordRegister">
+    <label for="passwordConfirmRegister">Confirm your password</label>
+    <input ngModel type="password" name="passwordConfirmRegister">
+    <button (click)="submitRegister(form)">Register</button>
+  </form>
+</span>

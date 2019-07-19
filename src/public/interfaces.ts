@@ -18,3 +18,13 @@ export interface CanvasLocationInterface {
   top?: number, 
   bottom?: number
 }
+
+export interface FileInterface {
+  favourite: boolean,
+  name: string,
+  root: string,
+  location: string,
+  highlights: string,
+  dateAccessed: Date,
+  zoom: number
+}

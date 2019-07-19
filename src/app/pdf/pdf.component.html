@@ -4,11 +4,14 @@
     <span class="zoomIn child fas fa-search-plus" (click)="zoomIn()"></span>
     <span class="zoomOut child fas fa-search-minus"(click)="zoomOut()"></span>
   </span>
+  <app-login *ngIf="user === null"></app-login>
   <span class="floatChildrenRight">
     <span class="save child fas fa-save"></span>
-    <label for="fileInput" class="fileInput child fas fa-plus"></label><input id="fileInput" type="file" (change)="loadNewPDF($event)">
+    <span [class.fas]="favourite" [class.far]="!favourite" [style.color]="favourite ? 'yellow' : 'rgb(145, 1, 1)'" class="star child fa-star" (click)="onFavourite()"></span>
+    <!-- <label for="fileInput" class="fileInput child fas fa-plus"></label><input id="fileInput" type="file" (change)="loadNewPDF($event)"> -->
     <span class="share child fas fa-share-alt"></span>
-    <a href="" class="signout child rightSide fas fa-sign-out-alt"></a>
+    <a (click)="signout()" class="signout child rightSide fas fa-sign-out-alt"></a>
+    <span class="fas fa-star-alt"></span>
   </span>
 </div>
 <div class="headerBarSpacer"></div>
@@ -16,7 +19,7 @@
   <h2 class="title">Navigation</h2>
   <ul>
     <li *ngIf="linearHighlights.length === 0">No highlighted sections to show</li>
-    <li *ngFor="let highlight of linearHighlights" (onmouseover)="console.log('yeppersa')">
+    <li *ngFor="let highlight of linearHighlights">
       <form #form="ngForm" #highlightForm (keydown.enter)="onSubmit(highlight, form)">
         <div class="positionAbsolute">
           <button class="scrollTo fas fa-eye" (click)="scrollTo(highlight)"></button>
@@ -24,37 +27,38 @@
         </div>
         <div class="highlight" [class.bold]="highlight.expanded">
           <span class="fas" [class.fa-chevron-down]="!highlight.expanded" [class.fa-chevron-up]="highlight.expanded" (click)="expandField(highlight, form)"></span>
-          <span *ngIf="!highlight.formMode">
+          <span [style.display]="highlight.formMode ? 'none' : 'inline'">
             {{highlight.field}}
           </span>
-          <input *ngIf="highlight.formMode" type="text" [(ngModel)]="highlight.field" name="field" autofocus>
+          <!-- add autofucos here somehow -->
+          <input [style.display]="highlight.formMode ? 'block' : 'none'" type="text" [(ngModel)]="highlight.field" name="field">
         </div>
         <div *ngIf="highlight.expanded">
           <hr>
-          <button class="edit" (click)="edit(highlight, form)">Edit</button>
+          <button *ngIf="!highlight.formMode" class="edit" (click)="edit(highlight, form)">Edit</button>
           <div class="paddingLeft">
             <p><b>Value</b>: 
-              <span *ngIf="!highlight.formMode">{{highlight.value}}</span>
-              <input *ngIf="highlight.formMode" type="text" [(ngModel)]="highlight.value" name="value">
+              <span [style.display]="highlight.formMode ? 'none' : 'inline'">{{highlight.value}}</span>
+              <input [style.display]="highlight.formMode ? 'block' : 'none'" type="text" [(ngModel)]="highlight.value" name="value">
             </p>
             <p><b>passed: </b>
-              <span *ngIf="!highlight.formMode">{{highlight.passed}}</span>
-              <select *ngIf="highlight.formMode" name="passed" [(ngModel)]="highlight.passed">
+              <span [style.display]="highlight.formMode ? 'none' : 'inline'">{{highlight.passed}}</span>
+              <select [style.display]="highlight.formMode ? 'block' : 'none'" name="passed" [(ngModel)]="highlight.passed">
                 <option value="true">yes</option>
                 <option value="false">no</option>
               </select>
             </p>
             <p><b>Message</b>: 
-              <span *ngIf="!highlight.formMode">
+              <span [style.display]="highlight.formMode ? 'none' : 'inline'">
                 {{highlight.comments}}
               </span>
-              <input *ngIf="highlight.formMode" type="text" [(ngModel)]="highlight.comments" name="comments">
+              <input [style.display]="highlight.formMode ? 'block' : 'none'" type="text" [(ngModel)]="highlight.comments" name="comments">
             </p>
             <p>
               <b>Author</b>: {{highlight.author}}
             </p>
             <p><b>Page</b>: {{highlight.page}}</p>
-            <button *ngIf="highlight.formMode" (click)="onSubmit(highlight, form)">Submit</button>
+            <button [style.display]="highlight.formMode ? 'block' : 'none'" (click)="onSubmit(highlight, form)">Submit</button>
           </div>
         </div> 
       </form>
@@ -65,15 +69,29 @@
   <!-- just a hack to allow a radial gradient to appear fixed -->
 </div>
 <div class="sidebarLeft" id="sidebarLeft">
-  <div class="fas fa-folder"></div>
-  <div class="fas fa-history"></div>
-  <div class="fas fa-star"></div>
-  <div class="fas fa-bookmark"></div>
-  <div class="fas fa-plus"></div>
-  <div class="fas fa-save"></div>
+  <div class="folder">
+    <div class="fas fa-folder"></div>
+    <div class="expansion">
+      <ul>
+        <li *ngFor="let userFileData of userData?.pdfs" (click)="downloadDocument(userFileData)">{{userFileData.name}}</li>
+      </ul>
+    </div>
+  </div>
+  <div class="history">
+    <div class="fas fa-history"></div>
+  </div>
+  <!-- <div class="fas fa-star"></div> -->
+  <div class="plus">
+    <label for="fileInput" class="fileInput child fas fa-plus"></label><input id="fileInput" type="file" (change)="loadNewPDF($event)">
+  </div>
+  <div class="save">
+    <div class="fas fa-save"></div>
+  </div>
+  
 </div>
 <div class="pdf">
   <div class="navHighlights">
   </div>
-  <app-pdf-page *ngFor="let page of pages; let i = index" [pageNum] = "i" [zoom] = "zoom" (addHighlight)="updateHighlights($event)">{{i}}</app-pdf-page>
+  <app-pdf-page *ngFor="let page of pages; let i = index" [redraw] = "redraw" [pageNum] = "i" [zoom] = "zoom" (addHighlight)="updateHighlights($event)">{{i}}</app-pdf-page>
+  <div>Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/"                 title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"                 title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 </div>
