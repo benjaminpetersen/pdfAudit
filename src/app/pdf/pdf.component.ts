@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, EventEmitter, Input } from '@angular/core';
 import { LoadPdfService } from '../load-pdf.service';
-import { LoadPdfOverlayService } from '../load-pdf-overlay.service';
+// import { LoadPdfOverlayService } from '../load-pdf-overlay.service';
 import { UserService } from '../user.service';
 import { UserHighlightsInterface } from 'src/public/interfaces';
 
@@ -11,7 +11,7 @@ import { UserHighlightsInterface } from 'src/public/interfaces';
 })
 export class PdfComponent implements OnInit, AfterViewInit {
   user: any;
-  userData: any;//
+  filesList: string[];
   pages; //for ngFor to generate one pdf-page per array item
   changeDetectionHack: any = null; //this is just to change each member of an array so that angular re-instantiates members with the ngFor directive
   zoom: number = 1;//changes scale for pdfjs and re-renders
@@ -20,11 +20,14 @@ export class PdfComponent implements OnInit, AfterViewInit {
   favourite: boolean = false;//to set pdf fav in database and 
   redraw: boolean = false;//this just changes when you want to redraw teh canvas so that ngOnChange within pdf-page.comp.ts will fire
 
-  constructor(private pdfOverlayService: LoadPdfOverlayService, private pdfService: LoadPdfService, private userService: UserService) { 
-    this.linearHighlights = pdfOverlayService.getLinearUserHighlights();
-    userService.authStateChange.subscribe(any => this.user = userService.user); //i should do some work with observers
+  constructor(private pdfService: LoadPdfService, private userService: UserService) {
+    this.linearHighlights = userService._linearArray;
+    userService.authStateChange.subscribe(any => {
+      this.user = userService.user;
+    }); //i should do some work with observers
     userService.userDataChange.subscribe((any) => {
-      this.userData = userService.userData;
+      if(userService.userData) this.filesList = Object.keys(userService.userData.pdfs);
+      this.linearHighlights = userService._linearArray;
     });
   }
   
@@ -75,8 +78,7 @@ export class PdfComponent implements OnInit, AfterViewInit {
 
   delete(highlightObject){
     //need to have a part of service that deletes one and call linearize again...
-    this.pdfOverlayService.deleteUserHighlight(highlightObject);
-    this.linearHighlights = this.pdfOverlayService.getLinearUserHighlights();
+    this.userService.deleteUserHighlight(highlightObject);
     this.redrawCanvass();
   }
 
@@ -91,13 +93,13 @@ export class PdfComponent implements OnInit, AfterViewInit {
   }
 
   downloadDocument(userFileData){//from the db
-    //userService loads highlights to pdf-overlay-service
     //pass to load-pdf service which just let's pdfjs read and get it ready for painting onto an html canvas
     this.userService.loadDocument(userFileData).then(this.initiatePdfRendering);
   }
 
   initiatePdfRendering = (doc: any)=>{
     //array for ngFor to loop over and make pdf-page.component.ts
+    this.expandedHighlight = undefined;
     this.pages = new Array(doc.numPages);
     //change array values so that angular change-detection re-initializes the pdf-page component.
     if(this.changeDetectionHack === null){
@@ -111,10 +113,9 @@ export class PdfComponent implements OnInit, AfterViewInit {
     }
   }
 
-  //on the addition of a new highlight event from pdf-page component
+  //@output() from pdf-page on the addition of a new highlight event from pdf-page component
   updateHighlights(highlight){
     //1 get new highlights
-    this.linearHighlights = this.pdfOverlayService.getLinearUserHighlights();
     if(this.expandedHighlight !== undefined){
       //2 submit and collapse other open sidebar element
       if(this.expandedHighlight.formMode) this.onSubmit(this.expandedHighlight);
@@ -142,7 +143,7 @@ export class PdfComponent implements OnInit, AfterViewInit {
     if(highlight.expanded) {this.expandedHighlight = highlight}
   }
 
-  onSubmit(highlight, ngForm?){
+  onSubmit(highlight, ngForm?){//erroneous fire here
     //1 close form
     highlight.formMode = false;
     //2 delete highlight if no user input, or submit
@@ -151,7 +152,7 @@ export class PdfComponent implements OnInit, AfterViewInit {
       this.delete(highlight);
     }
     else{
-      this.pdfOverlayService.setUserHighlights(highlight);
+      this.userService.setUserHighlights(highlight);//this also happens from pdf-page.... 
     }
   }
 
@@ -161,5 +162,6 @@ export class PdfComponent implements OnInit, AfterViewInit {
 
   signout(){
     this.userService.signOut();
+    document.location.reload();
   }
 }

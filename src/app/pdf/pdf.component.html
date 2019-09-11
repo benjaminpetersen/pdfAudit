@@ -73,7 +73,7 @@
     <div class="fas fa-folder"></div>
     <div class="expansion">
       <ul>
-        <li *ngFor="let userFileData of userData?.pdfs" (click)="downloadDocument(userFileData)">{{userFileData.name}}</li>
+        <li *ngFor="let fileName of filesList" (click)="downloadDocument(fileName)">{{fileName}}</li>
       </ul>
     </div>
   </div>

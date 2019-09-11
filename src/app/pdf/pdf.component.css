@@ -150,6 +150,7 @@ ul {
 
 .sidebarLeft {
     left: 0;
+    width: 56px;
     box-shadow: 5px 0px 7px rgb(0, 0, 0);
     top: 50%;
     transform: translateY(-50%);
@@ -170,12 +171,6 @@ ul {
     color: rgb(187, 185, 185);
     text-shadow: 0 0 2px red;
 }
-
-/* .sidebarLeft img {
-    padding: 20%;
-    width: 60%;
-    margin: auto;
-} */
 
 .pdf {
     padding-top: 100px;

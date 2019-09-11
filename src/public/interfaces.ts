@@ -24,7 +24,15 @@ export interface FileInterface {
   name: string,
   root: string,
   location: string,
-  highlights: string,
+  highlights: {
+    highlights: any,
+    count: number, 
+    new: boolean
+  },
   dateAccessed: Date,
   zoom: number
+}
+
+export interface userDataInterface {
+  pdfs: any //this will be an object of {fileName1: FileInterface, fileName2: FileInterface ... }
 }

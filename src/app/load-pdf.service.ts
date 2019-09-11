@@ -50,7 +50,7 @@ export class LoadPdfService {
     // this is the code from above... it just has to call afStorage and save the file, and pdf.comp.ts needs to call user.serv instead
     // it might be kind of nice to have a save option or just open to view, and then set newPDF to true in the whole PDFJS call, and false in the get doc form inpput cal
     let storagePath = this.afStorage.ref(userFileData.root).child(userFileData.location);//isn't in docs but console error said to do this... try it?
-    storagePath.put(file);//todo cehck?
+    storagePath.put(file);
   }
 
   loadDocument(root, path){//worked before damnit. hrm

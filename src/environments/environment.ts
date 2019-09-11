@@ -6,13 +6,13 @@ export const environment = {
   production: false,
   author: "bpetersen123@hotmail.com",
   firebase: {
-    apiKey: "AIzaSyAj5rz07LzHIt-YS-HfnFg36dATG5Nr3aE",
-    authDomain: "tsestting.firebaseapp.com",
-    databaseURL: "https://tsestting.firebaseio.com",
-    projectId: "tsestting",
-    storageBucket: "tsestting.appspot.com",
-    messagingSenderId: "102625481882",
-    appId: "1:102625481882:web:4ab603c601f538cd"
+    apiKey: "AIzaSyC-eQyQz0HWIIxOidq8Zy85DDSz7M9E9JY",
+    authDomain: "pdfauditing.firebaseapp.com",
+    databaseURL: "https://pdfauditing.firebaseio.com",
+    projectId: "pdfauditing",
+    storageBucket: "pdfauditing.appspot.com",
+    messagingSenderId: "480262564968",
+    appId: "1:480262564968:web:2c1f51785f776d5c"
   }
 };
 

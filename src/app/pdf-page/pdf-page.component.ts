@@ -2,8 +2,9 @@ import { Component, OnInit, OnChanges, Input, AfterViewInit, Output, EventEmitte
 import { LoadPdfService } from '../load-pdf.service';
 import { NgForm } from '@angular/forms';
 import { environment } from '../../environments/environment';
-import { LoadPdfOverlayService } from '../load-pdf-overlay.service';
+// import { LoadPdfOverlayService } from '../load-pdf-overlay.service';
 import { UserHighlightsInterface, CanvasLocationInterface } from '../../public/interfaces';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-pdf-page',
@@ -50,8 +51,8 @@ export class PdfPageComponent implements OnInit, AfterViewInit, OnChanges {
   page: any;//the value from pdfjs after getting the individual page. used later to render the page
   pagePromise: any; //will let you know when page is ready to be accessed -> pagePromise.then((foo)=>this.page);
   
-  constructor(private pdfService: LoadPdfService, private pdfOverlayService: LoadPdfOverlayService) {
-    this.allHighlights = pdfOverlayService.getUserHighlights(this.pageNum);
+  constructor(private pdfService: LoadPdfService, private userService: UserService) {
+    this.allHighlights = userService._userHighlights[this.page - 1];
     // console.log(this.prevHighlights);//for some reason this the whole array and not the specfic potion i asked for. 
   }
 
@@ -147,7 +148,14 @@ export class PdfPageComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   resetCanvas(){
-    this.prevHighlights = this.pdfOverlayService.getUserHighlights(this.pageNum); // I can't seem to get this fn to work without this line. this.prevHighlights should be a reference to a service's array, but it isn't...
+    if(this.userService._userHighlights.highlights){
+      this.prevHighlights = this.userService._userHighlights.highlights['page'+this.pageNum]; // I can't seem to get this fn to work without this line. this.prevHighlights should be a reference to a service's array, but it isn't...
+    }
+    else{
+      //newp. just stops me from ever clearing canvas?
+      return;
+    }
+
     const ctx = this.highlightCanvas.getContext('2d');
     ctx.globalAlpha = 0.3; //transparency of rectangles
     ctx.clearRect(0, 0, this.highlightCanvas.width, this.highlightCanvas.height); //clear
@@ -172,7 +180,7 @@ export class PdfPageComponent implements OnInit, AfterViewInit, OnChanges {
       formMode: true,
       count: 0
     }
-    this.pdfOverlayService.setUserHighlights(newHighlight); //this service could return a pointer to the highlight and i could pass that along. 
+    this.userService.setUserHighlights(newHighlight); //this service could return a pointer to the highlight and i could pass that along. 
     this.addHighlight.emit(newHighlight);
   }
 }
